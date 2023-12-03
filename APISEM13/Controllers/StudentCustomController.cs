@@ -18,6 +18,15 @@ namespace APISEM13.Controllers
         }
 
         // GET: api/student
+        [HttpGet(Name = "GetCustomStudents")]
+        public List<Student> GetCustomStudents()
+        {
+            var response = _context.Students.ToList();
+            return response;
+
+        }
+
+        // GET: api/student
         [HttpGet(Name ="GetByFilters")]
         public List<Student> GetByFilters(string firstName, string lastName, string email)
         {
@@ -53,6 +62,52 @@ namespace APISEM13.Controllers
            return response;
         }
 
+        // 1
+        [HttpPost(Name = "InsertCourse")]
+        public void InsertCourse(Course course)
+        {
+            course.IsActive = true;
+            _context.Courses.Add(course);
+            _context.SaveChanges();
+        }
+
+        // 2
+        [HttpDelete(Name = "DeleteCourse")]
+        public void DeleteCourse(int Id)
+        {
+            var course = _context.Courses.Where(x => x.IsActive == true && x.CourseID == Id).FirstOrDefault();
+            course.IsActive = false;
+            _context.Entry(course).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
+        // 3
+        [HttpPost(Name = "InsertGrade")]
+        public void InsertGrade(Grade grade)
+        {
+            grade.IsActive = true;
+            _context.Grades.Add(grade);
+            _context.SaveChanges();
+        }
+
+        // 4
+        [HttpDelete(Name = "DeleteGrade")]
+        public void DeleteGrade(int Id)
+        {
+            var grade = _context.Grades.Where(x => x.IsActive == true && x.GradeID == Id).FirstOrDefault();
+            grade.IsActive = false;
+            _context.Entry(grade).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
+        // 5
+        [HttpPost(Name = "InsertStudent")]
+        public void InsertStudent(Student student)
+        {
+            _context.Students.Add(student);
+            _context.SaveChanges();
+        }
+
         // 6
         [HttpPost(Name = "UpdateContacts")]
         public void UpdateContacts(StudentRequestV1 request)
@@ -69,27 +124,69 @@ namespace APISEM13.Controllers
             _context.SaveChanges();
         }
 
+        //7
+        [HttpPost(Name = "UpdatePersonalData")]
+        public void UpdatePersonalData(StudentRequestV3 request)
+        {
+            var student = _context.Students.Find(request.StudentID);
+
+            student.FirstName = request.FirstName;
+            student.LastName = request.LastName;
+
+            _context.Entry(student).State = EntityState.Modified;
+            _context.SaveChanges();
+        }
+
         // 8
         [HttpPost(Name = "InsertByGrade")]
         public void InsertByGrade(StudentRequestV2 request)
         {
-            /*foreach (var item in request.Students)
-            {
-                item.GradeID = request.GradeID;
-                _context.Students.Add(item);
-                _context.SaveChanges();
-            }*/
-
             var students = request.Students.Select(x => new Student 
             {
                 Email = x.Email,
                 FirstName = x.FirstName,
+                LastName = x.LastName,
                 Phone = x.Phone,
                 Grade = x.Grade,
                 GradeID = request.GradeID
             }).ToList();
 
             _context.Students.AddRange(students); //inserta en grupo
+            _context.SaveChanges();
+        }
+
+        // 9
+        [HttpDelete(Name = "DeleteCourseList")]
+        public void DeleteCourseList(StudentRequestV4 request)
+        {
+            var course = request.Courses.Select(x => x.CourseID).ToList();
+
+            var courseToDelete = _context.Courses.Where(x => course.Contains(x.CourseID)).ToList();
+            courseToDelete.ForEach(x => x.IsActive = false);
+
+            _context.Courses.UpdateRange(courseToDelete);
+            _context.SaveChanges();
+        }
+
+        // 10
+        [HttpPost(Name = "InsertEnrollment")]
+        public void InsertEnrollment(StudentRequestV5 request)
+        {
+            var student = _context.Students.FirstOrDefault(x => x.StudentID == request.StudentID);
+
+            var courseid = request.Courses.Select(x => x.CourseID).ToList();
+
+            var course= _context.Courses.Where(x => courseid.Contains(x.CourseID)).ToList();
+
+            var enrollments = course.Select(course => new Enrollment
+            {
+                Student = student,
+                Course = course,
+                Date = DateTime.Now
+
+            }).ToList();
+
+            _context.Enrollments.AddRange(enrollments);
             _context.SaveChanges();
         }
     }
