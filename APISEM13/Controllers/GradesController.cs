@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using APISEM13.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace APISEM13.Controllers
 {
@@ -21,6 +22,7 @@ namespace APISEM13.Controllers
         }
 
         // GET: api/Grades
+        [Authorize("Administrador")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Grade>>> GetGrades()
         {

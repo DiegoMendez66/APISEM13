@@ -1,5 +1,6 @@
 ﻿using APISEM13.Models;
 using APISEM13.Models.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace APISEM13.Controllers
         }
 
         // GET: api/student
+        [Authorize("Vendedor")]
         [HttpGet(Name = "GetCustomStudents")]
         public List<Student> GetCustomStudents()
         {
